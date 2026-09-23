@@ -1,0 +1,41 @@
+# Evidence and database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
+*.wal
+*.shm
+
+# Common exports that may contain evidence
+*.csv
+*.json
+
+# Disk / forensic images and archives
+*.dd
+*.img
+*.raw
+*.E01
+*.e01
+*.aff
+*.aff4
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+
+# Apple / Python
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local analysis output
+output/
+reports/
+working/
+evidence/
