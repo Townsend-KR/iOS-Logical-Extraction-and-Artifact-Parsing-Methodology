@@ -2,6 +2,10 @@
 
 A digital-forensics portfolio project documenting the preservation, examination, parsing, and correlation of authorized Apple/iOS artifacts spanning approximately 2017 to the present.
 
+**Focus:** SQLite • WAL/SHM • Apple Messages • synchronization/CloudKit artifacts • artifact correlation • hashing • recovery methodology • reproducible Python/SQL workflows
+
+> This repository publishes methodology, aggregate results, and sanitized or synthetic examples. It does not publish original private evidence.
+
 ## Project Scope
 
 The source material examined in this project originated from multiple authorized sources, including:
@@ -19,16 +23,36 @@ The examination was performed without relying on interactive access to the origi
 
 No commercial mobile-forensics suite was used for the artifact analysis documented here. The methodology emphasizes direct examination of underlying data with SQLite/SQL, filesystem analysis, cryptographic hashing, command-line/open-source tools, and purpose-built scripts where appropriate.
 
+## Featured Case Studies
+
+### Messages WAL State Comparison
+
+A controlled comparison of `chat.db` before and after incorporation of the captured WAL documented a change from **53,072 to 53,073 message rows**, along with corresponding changes in attachment and relationship tables.
+
+[Read the case study](docs/case-studies/messages-wal-state-comparison.md)
+
+### Synchronization-Assisted Messages Reconstruction
+
+The associated `Sync/sync.db` synchronization database was examined as a separate evidence source. Its WAL-applied state contained five additional `ZREMOTERECORD` entries relative to the base-file state. The methodology deliberately avoids assuming those records map directly to the local Messages changes without record-level validation.
+
+[Read the case study](docs/case-studies/synchronization-assisted-messages-reconstruction.md)
+
+### Unallocated-Space SQLite Recovery
+
+A secondary-storage observation involving Messages-related SQLite material recovered from unallocated space is documented as **unresolved** while the original recovery records are being located. The working hypothesis is explicitly separated from established findings.
+
+[Read the unresolved recovery note](docs/case-studies/unallocated-space-sqlite-recovery.md)
+
 ## Primary Artifact Families
 
-Initial analysis focuses on:
+Analysis includes:
 
 - Apple Messages `chat.db`
 - Apple Notes `NoteStore.sqlite`
 - SQLite `-wal` and `-shm` files
 - Messages attachments and relational records
 - Notes/Core Data structures
-- synchronization and CloudKit-related artifacts
+- `Sync/sync.db` and CloudKit-related structures
 - relevant metadata and property-list artifacts
 - historical database instances spanning multiple Apple software generations
 
@@ -71,20 +95,22 @@ The workflow is deliberately evidence-first. Source artifacts are preserved, ana
 | `samples/` | Synthetic or sanitized demonstration material only |
 | `research/` | Technical references and schema/version research |
 
+For a short technical-review path through the project, see the [Portfolio Review Guide](docs/portfolio-guide.md).
+
 ## Evidence Protection
 
-This repository is intended to become public. Original evidentiary databases, private communications, credentials, account identifiers, device identifiers, phone numbers, email addresses, and other personally identifying information are not published.
+Original evidentiary databases, private communications, credentials, account identifiers, device identifiers, phone numbers, email addresses, identifying local paths, and other personally identifying information are not published.
 
-Examples in this repository must be synthetic, sanitized, or structurally representative.
+Examples in this repository must be synthetic, sanitized, aggregate, or structurally representative.
 
 ## Methodological Caution
 
 The presence of a record or recovered file does not automatically establish authorship, ownership, user interaction, original path, or intent. Conclusions are limited to what the available artifacts and provenance support.
 
-Likewise, SQLite schemas and timestamp representations can change between application and operating-system versions. Queries are therefore documented with their assumptions rather than presented as universally valid across every iOS release.
+Likewise, SQLite schemas and timestamp representations can change between application and operating-system versions. Queries are documented with their assumptions rather than presented as universally valid across every iOS release.
 
-## Current Status
+## Repository Status
 
-This repository is under active construction. Documentation and utilities are being added only when the underlying procedure or claim can be substantiated.
+The repository contains a reviewable methodology foundation, conservative analysis utilities, schema-discovery queries, and initial case studies. Additional record-level correlation examples will be added only when they can be published without exposing private source evidence and when the underlying relationship is independently supported.
 
-See [docs/methodology.md](docs/methodology.md), [docs/evidence-handling.md](docs/evidence-handling.md), and [docs/limitations.md](docs/limitations.md) for the initial methodology.
+Start with the [Portfolio Review Guide](docs/portfolio-guide.md), then see [Forensic Methodology](docs/methodology.md), [Evidence Handling](docs/evidence-handling.md), and [Limitations](docs/limitations.md).
