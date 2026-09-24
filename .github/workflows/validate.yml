@@ -1,0 +1,44 @@
+name: Validate Forensic Utilities
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Compile Python utilities
+        run: python -m compileall -q scripts
+
+      - name: Verify repository contains no evidence files
+        run: |
+          if find . -type f \( \
+            -name "*.db" -o \
+            -name "*.sqlite" -o \
+            -name "*.sqlite3" -o \
+            -name "*.wal" -o \
+            -name "*.shm" -o \
+            -name "*.E01" -o \
+            -name "*.e01" -o \
+            -name "*.dd" -o \
+            -name "*.raw" -o \
+            -name "*.img" \
+          \) -print -quit | grep -q .; then
+            echo "Potential evidence file detected."
+            exit 1
+          fi
+
+          echo "No prohibited evidence files detected."
