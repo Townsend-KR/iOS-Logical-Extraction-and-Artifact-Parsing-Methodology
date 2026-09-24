@@ -1,21 +1,27 @@
-# Secondary-Storage Recovery Case Study
+# Secondary-Storage Recovery Methodology
 
 ## Scope
 
-A separate component of the broader examination involved authorized secondary-storage media containing allocated and unallocated data.
+A separate component of the broader authorized examination involved secondary-storage media containing both allocated and unallocated data.
 
-File-carving techniques were used to recover files no longer represented by active filesystem entries. Recovered material included legacy technical and information-security documentation.
+The workflow included source-media preservation, raw imaging, filesystem-layout examination, strings/signature review, and file carving with PhotoRec. Recovered material included technical documents as well as SQLite-related artifacts relevant to the broader Apple/iOS examination.
 
-The significance of this exercise is the recovery methodology, not the content of the recovered publications.
+## Preservation
 
-## Evidentiary Interpretation
+Historical examination notes document unmounting source media before acquisition, creation of raw images with `dd`, verification of image creation, and cryptographic hashing as part of the preservation process. Subsequent recovery work was performed against forensic images rather than treating the physical media as a disposable working copy.
 
-A carved file demonstrates that recoverable byte sequences consistent with that file existed in the examined data source. Without supporting filesystem metadata or independent artifacts, the recovery does not by itself establish the file's original name, path, owner, acquisition method, or whether a user opened it.
+Where a contemporaneous digest is private or unnecessary for public verification, this repository documents that hashing occurred without publishing the evidentiary value.
 
-Representative portfolio output can therefore document recovery method, detected file type, recovered size, cryptographic hash, validation result, and a sanitized description.
+## Recovery and Interpretation
 
-Original copyrighted publications and private recovered material are not included in this repository.
+File carving was used to recover data no longer represented by active filesystem entries. A carved file demonstrates that recoverable byte sequences consistent with that file existed in the examined data source.
+
+It does **not**, without supporting metadata or independent artifacts, establish the file's original name, path, owner, acquisition method, or whether a user opened it.
+
+Recovered SQLite material is therefore identified and validated structurally. Filename and extension are treated as clues, not conclusions.
 
 ## Relationship to the iOS Project
 
-This case study is intentionally separated from the iOS logical-data methodology. It demonstrates file recovery and interpretation of unallocated-space artifacts without implying that the recovered secondary-storage files originated from an iOS logical acquisition.
+Secondary-storage recovery is documented separately from backup-derived logical data so that acquisition provenance remains clear. A database recovered from secondary storage may subsequently be parsed with the same SQLite methodology used for an iOS backup artifact, but that does not transform its acquisition path into a logical extraction.
+
+See [Unallocated-Space Messages SQLite Recovery](case-studies/unallocated-space-sqlite-recovery.md) for the Messages-related example.
