@@ -1,46 +1,89 @@
-# Unallocated-Space SQLite Recovery: An Unresolved Observation
+# Unallocated-Space Messages SQLite Recovery
 
-## Status
+## Scope
 
-**Unresolved / documentation recovery pending**
+This case study documents an authorized examination of a 64 GB secondary-storage device that contained allocated and unallocated data relevant to a broader historical Apple/iOS artifact examination.
 
-This note intentionally records an observation without presenting an unverified explanation as a forensic conclusion.
+The purpose of the public case study is to demonstrate recovery methodology, SQLite identification, and artifact correlation. The original source image, recovered database, private communications, personal identifiers, and evidentiary hash values are not published.
 
-## Observation
+## Preservation and Source Layout
 
-During earlier examination of secondary storage, Messages-related SQLite material was reportedly recovered from unallocated space on a 64 GB USB device. The recovery was associated with a substantially larger `chat.db` dataset and appeared, during examination, to expose additional forensic information.
+The source device was unmounted before imaging. Historical examination notes document creation of a raw forensic image with `dd`, verification of the resulting image, cryptographic hashing as part of the preservation workflow, and subsequent examination of the image rather than continued content analysis against the physical source.
 
-The original acquisition/recovery records needed to establish the precise mechanism have not yet been relocated. For that reason, this repository does **not** currently assert how the material came to reside on the USB device or why the recovered examination produced the observed result.
+A preserved `mmls` report records a DOS partition table with a primary NTFS/exFAT-type partition beginning at sector 32,768 and extending through sector 124,735,487, with unallocated sectors before and after the partition. At 512 bytes per sector, the reported geometry is consistent with a nominal 64 GB device.
 
-## Working Hypothesis
+The public repository records the structure and methodology without publishing the source image or its evidentiary digest.
 
-One possible explanation is that an earlier attempt to copy a substantially larger Messages database dataset to the USB device failed because the destination lacked sufficient capacity, while some database bytes or fragments were nevertheless written before the transfer terminated. Those remnants may later have been recoverable from unallocated space.
+## Recovery Workflow
 
-This is a hypothesis only.
+Historical examination records document the following sequence:
 
-Other explanations remain possible, including differences in carving, filesystem allocation, sparse/logical-size reporting, independently recovered SQLite pages, associated WAL material, or the examination process itself.
+```text
+Physical secondary-storage source
+        |
+        v
+Unmount source media
+        |
+        v
+Create raw forensic image
+        |
+        v
+Verify / hash image
+        |
+        v
+Inspect filesystem and unallocated space
+        |
+        v
+Carve recoverable files with PhotoRec
+        |
+        v
+Identify SQLite artifacts
+        |
+        v
+Examine schema and relational content
+        |
+        v
+Correlate against other authorized historical artifacts
+```
 
-## Hash Constraint
+PhotoRec was used during recovery from the forensic image. Because carved filenames and extensions are not reliable provenance, SQLite material was evaluated by file structure and database schema rather than by filename alone.
 
-If two complete files have the same byte length and the same SHA-256 digest, they should be treated as byte-identical for practical forensic comparison. One such file cannot contain additional bytes absent from the other.
+## Messages Artifact Analysis
 
-Accordingly, any remembered difference in recoverable information must be reconciled against the original records. Potential sources include material outside the file itself, separately carved regions, sidecar data, recovery output, or comparison against a different logical database state.
+The recovered Messages-related database was examined directly with SQLite/SQL. Historical query output documents examination of the `message`, `handle`, `chat`, attachment-related, and deletion/recovery structures.
 
-## Required Validation
+The analytical process included:
 
-Before this observation is promoted to a completed case study, the following should be recovered or independently re-established where available:
+- establishing database scope and message-date ranges;
+- resolving identifier representations through `handle` records and `message.handle_id`;
+- checking duplicate handle representations rather than assuming a single identifier mapped to a single row;
+- interpreting `is_from_me` as message direction while retaining the participant relationship supplied by the handle;
+- testing NULL `message.text` records for content in `attributedBody`, attachments, and other message-item metadata;
+- examining `deleted_messages` and `unsynced_removed_recoverable_messages`; and
+- correlating GUIDs and relational records when evaluating deleted or recoverable material.
 
-- source-media image or preserved recovery set;
-- acquisition and carving logs;
-- filesystem metadata for the USB device;
-- reported logical and allocated sizes of relevant artifacts;
-- SHA-256 manifests;
-- recovered `chat.db`, WAL, SHM, or carved SQLite regions;
-- tool/version information and recovery parameters; and
-- output demonstrating the reportedly additional information.
+This progression matters because a zero-row query, a NULL text field, or a duplicate identifier is not by itself a forensic conclusion. Each result changes the next question.
 
-## Reporting Principle
+## Timestamp Handling
 
-The absence of the original documentation is itself a limitation and is reported as such.
+Historical queries converted Apple message timestamps using the 2001 Apple epoch and nanosecond scaling used by the examined schema. Some exploratory output was presented as UTC while later targeted queries used SQLite's `localtime` modifier.
 
-This case study remains intentionally unresolved because a plausible explanation is not the same thing as a demonstrated one. That distinction is part of the forensic methodology being demonstrated by this repository.
+Those representations are intentionally distinguished. Presentation timezone is not treated as part of the stored timestamp value.
+
+## Validation
+
+The recovered database was not interpreted in isolation. Its records were compared with other authorized historical database copies and related artifacts available during the broader examination. Correlation relied on structural relationships such as identifiers, GUIDs, timestamps, attachments, and chronology rather than on filename similarity alone.
+
+Cryptographic hashing was performed during the historical workflow. The actual digest is intentionally withheld from this public portfolio because publishing a persistent identifier for private evidence is unnecessary to demonstrate the method.
+
+## Evidentiary Limits
+
+Carving can establish that recoverable byte sequences consistent with a file existed in the examined source. Without supporting filesystem metadata, a carved artifact does not by itself establish its original filename, path, owner, acquisition mechanism, or whether a user opened it.
+
+Likewise, successful SQLite parsing establishes that a structure can be interpreted. Authorship, intent, and user action require separate evidentiary support.
+
+## Portfolio Boundary
+
+This case study intentionally stops where public demonstration should stop. It documents the acquisition/recovery sequence, preservation practice, filesystem examination, carving method, database-analysis strategy, and validation logic while keeping the actual evidence private.
+
+That boundary is part of the methodology, not a missing step.
