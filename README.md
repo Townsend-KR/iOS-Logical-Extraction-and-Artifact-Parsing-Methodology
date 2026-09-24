@@ -1,60 +1,50 @@
 # iOS Logical Extraction and Artifact Parsing Methodology
 
-A digital-forensics portfolio project documenting the preservation, examination, parsing, and correlation of authorized Apple/iOS artifacts spanning approximately 2017 to the present.
+A digital-forensics portfolio project documenting the preservation, recovery, examination, parsing, and correlation of authorized Apple/iOS artifacts spanning approximately 2017 to the present.
 
-**Focus:** SQLite • WAL/SHM • Apple Messages • synchronization/CloudKit artifacts • artifact correlation • hashing • recovery methodology • reproducible Python/SQL workflows
+**Focus:** SQLite • WAL/SHM • Apple Messages • synchronization/CloudKit artifacts • secondary-storage recovery • artifact correlation • hashing • reproducible Python/SQL workflows
 
-> This repository publishes methodology, aggregate results, and sanitized or synthetic examples. It does not publish original private evidence.
+> This repository publishes methodology and sanitized or synthetic examples. Original private evidence, communications, identifiers, forensic images, recovered databases, and evidentiary hashes are intentionally excluded.
 
 ## Project Scope
 
-The source material examined in this project originated from multiple authorized sources, including:
+The examination drew from multiple authorized sources, including iOS backup-derived logical data, recovered SQLite databases, historical database copies, SQLite WAL/SHM companions, synchronization-related artifacts, attachments, filesystem artifacts, and files recovered from secondary storage.
 
-- iOS backup-derived logical data
-- recovered SQLite databases and historical database copies
-- SQLite write-ahead log (WAL) and shared-memory (SHM) companions
-- synchronization and CloudKit-related artifacts
-- attachments and associated filesystem artifacts
-- files recovered from secondary storage
+Not every artifact was produced by a logical extraction. Acquisition and recovery are documented separately from subsequent parsing and analysis so that provenance is not blurred simply because two artifacts can be queried with the same tools.
 
-Not every artifact in this project was produced by a logical extraction. Acquisition or recovery method is documented separately from subsequent artifact parsing and analysis.
-
-The examination was performed without relying on interactive access to the originating devices, device passcodes, or application interfaces. This created constraints similar to those encountered when an examiner receives historical, backup-derived, or independently recovered evidence rather than a functioning unlocked device.
-
-No commercial mobile-forensics suite was used for the artifact analysis documented here. The methodology emphasizes direct examination of underlying data with SQLite/SQL, filesystem analysis, cryptographic hashing, command-line/open-source tools, and purpose-built scripts where appropriate.
+The work was performed without relying on interactive access to the originating devices, device passcodes, or application interfaces. No commercial mobile-forensics suite was used for the artifact analysis documented here. Examination instead relied on direct inspection of underlying data with SQLite/SQL, filesystem analysis, cryptographic hashing, command-line/open-source tools, and purpose-built scripts.
 
 ## Featured Case Studies
 
 ### Messages WAL State Comparison
 
-A controlled comparison of `chat.db` before and after incorporation of the captured WAL documented a change from **53,072 to 53,073 message rows**, along with corresponding changes in attachment and relationship tables.
+A controlled comparison of `chat.db` before and after incorporation of the captured WAL documented a change from **53,072 to 53,073 message rows**, together with corresponding changes in attachment and relationship tables.
 
 [Read the case study](docs/case-studies/messages-wal-state-comparison.md)
 
 ### Synchronization-Assisted Messages Reconstruction
 
-The associated `Sync/sync.db` synchronization database was examined as a separate evidence source. Its WAL-applied state contained five additional `ZREMOTERECORD` entries relative to the base-file state. The methodology deliberately avoids assuming those records map directly to the local Messages changes without record-level validation.
+The associated `Sync/sync.db` synchronization database was examined as a separate evidence source. Its WAL-applied state contained five additional `ZREMOTERECORD` entries relative to the base-file state. Those records are not assumed to map directly to local Messages changes without record-level validation.
 
 [Read the case study](docs/case-studies/synchronization-assisted-messages-reconstruction.md)
 
-### Unallocated-Space SQLite Recovery
+### Unallocated-Space Messages Database Recovery
 
-A secondary-storage observation involving Messages-related SQLite material recovered from unallocated space is documented as **unresolved** while the original recovery records are being located. The working hypothesis is explicitly separated from established findings.
+A separate 64 GB secondary-storage source was preserved as a forensic image and examined for allocated and unallocated data. Historical examination records document hashing, filesystem-layout review, file carving with PhotoRec, and subsequent SQLite analysis. A Messages-related SQLite database recovered during that work was examined by schema and relational content rather than by filename alone.
 
-[Read the unresolved recovery note](docs/case-studies/unallocated-space-sqlite-recovery.md)
+The public case study documents the recovery and analytical method while deliberately withholding the private database, communications, identifiers, source image, and evidentiary hash values.
 
-## Primary Artifact Families
+[Read the case study](docs/case-studies/unallocated-space-sqlite-recovery.md)
 
-Analysis includes:
+## Analytical Questions Demonstrated
 
-- Apple Messages `chat.db`
-- Apple Notes `NoteStore.sqlite`
-- SQLite `-wal` and `-shm` files
-- Messages attachments and relational records
-- Notes/Core Data structures
-- `Sync/sync.db` and CloudKit-related structures
-- relevant metadata and property-list artifacts
-- historical database instances spanning multiple Apple software generations
+The project goes beyond simply opening `chat.db`. The documented SQL workflow addresses several recurring forensic problems:
+
+- **Identity resolution:** correlating service/identifier representations through `handle.rowid` and `message.handle_id`.
+- **Directionality:** interpreting `is_from_me` in conjunction with participant relationships rather than treating a handle as the sender by default.
+- **Content representation:** testing `text`, `attributedBody`, attachments, and message-item metadata before concluding that a NULL text field represents an empty message.
+- **Deletion and recovery:** examining `deleted_messages`, `unsynced_removed_recoverable_messages`, GUID relationships, and recovered database material.
+- **Timestamp interpretation:** distinguishing stored Apple timestamp values from normalized UTC or local-time presentation.
 
 ## Forensic Workflow
 
@@ -65,7 +55,7 @@ Acquisition / Recovery
 Preservation & Hashing
         |
         v
-Artifact Inventory
+Filesystem / Artifact Inventory
         |
         v
 Validation & Schema Discovery
@@ -74,43 +64,43 @@ Validation & Schema Discovery
 Parsing & Timestamp Normalization
         |
         v
-Cross-Artifact Correlation
+Relational & Cross-Artifact Correlation
         |
         v
 Reconstruction & Validation
         |
         v
-Documented Findings
+Sanitized Reporting
 ```
 
-The workflow is deliberately evidence-first. Source artifacts are preserved, analysis is performed against working copies where practical, and directly observed facts are distinguished from analytical inference.
+The workflow is evidence-first. Original artifacts are preserved, analysis is performed against working copies where practical, and directly observed facts are distinguished from analytical inference.
 
 ## Repository Layout
 
 | Path | Purpose |
 | --- | --- |
-| `docs/` | Scope, evidence handling, artifact methodology, limitations, and case studies |
+| `docs/` | Scope, evidence handling, methodology, limitations, and case studies |
 | `scripts/` | Conservative utilities for hashing, inventory, SQLite metadata, and timestamp handling |
-| `queries/` | Version-aware SQL examples for Messages, Notes, and SQLite examination |
+| `queries/` | Schema discovery and sanitized analytical SQL |
 | `samples/` | Synthetic or sanitized demonstration material only |
 | `research/` | Technical references and schema/version research |
 
-For a short technical-review path through the project, see the [Portfolio Review Guide](docs/portfolio-guide.md).
+For a short technical-review path, start with the [Portfolio Review Guide](docs/portfolio-guide.md).
 
 ## Evidence Protection
 
-Original evidentiary databases, private communications, credentials, account identifiers, device identifiers, phone numbers, email addresses, identifying local paths, and other personally identifying information are not published.
+This is a portfolio, not an evidence dump. Original databases, forensic images, private communications, attachments, credentials, account/device identifiers, phone numbers, email addresses, identifying local paths, and evidentiary hash values are not published.
 
-Examples in this repository must be synthetic, sanitized, aggregate, or structurally representative.
+Where historical examination records establish that hashing was performed, the methodology records that fact without exposing a persistent identifier for the private source artifact.
 
 ## Methodological Caution
 
-The presence of a record or recovered file does not automatically establish authorship, ownership, user interaction, original path, or intent. Conclusions are limited to what the available artifacts and provenance support.
+The presence of a record or recovered file does not automatically establish authorship, ownership, user interaction, original path, or intent. A successful parse is not itself a forensic conclusion.
 
-Likewise, SQLite schemas and timestamp representations can change between application and operating-system versions. Queries are documented with their assumptions rather than presented as universally valid across every iOS release.
+SQLite schemas and timestamp representations also change across Apple software generations. Queries are therefore documented with their assumptions rather than presented as universally valid across every iOS release.
 
 ## Repository Status
 
-The repository contains a reviewable methodology foundation, conservative analysis utilities, schema-discovery queries, and initial case studies. Additional record-level correlation examples will be added only when they can be published without exposing private source evidence and when the underlying relationship is independently supported.
+This repository is a sanitized professional representation of completed and ongoing authorized forensic work. It contains repeatable methodology, conservative analysis utilities, schema-discovery queries, and case studies derived from actual examination workflows while maintaining a strict boundary around private evidence.
 
-Start with the [Portfolio Review Guide](docs/portfolio-guide.md), then see [Forensic Methodology](docs/methodology.md), [Evidence Handling](docs/evidence-handling.md), and [Limitations](docs/limitations.md).
+Start with [Forensic Methodology](docs/methodology.md), [Evidence Handling](docs/evidence-handling.md), [Limitations](docs/limitations.md), and the [Portfolio Review Guide](docs/portfolio-guide.md).
